@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 
 class FormPlatformClient:
-    """飞书表单引擎客户端"""
+    """公司表单引擎客户端 (内部自研系统, 非飞书; token 长期有效, 无需续期)"""
 
     def __init__(self):
         self.base_url = FORM_PLATFORM_URL
@@ -41,7 +41,7 @@ class FormPlatformClient:
         """
         调用表单引擎节点回退接口,将节点状态从"已通过"回退到"待审批"
 
-        TODO: 接口路径和参数待飞书表单平台方确认,以下为预期实现
+        TODO: 接口路径和参数待公司表单引擎平台方确认,以下为预期实现
         预期能力:
         - 传入 apply_id, node_id
         - 平台将该节点回退到审批中状态
