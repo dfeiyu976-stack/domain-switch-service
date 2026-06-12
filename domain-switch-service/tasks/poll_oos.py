@@ -41,7 +41,7 @@ async def poll_oos_result(
             task = SwitchTask.find_by_task_id(task_id)
             task.update(status="success", finished_at=datetime.now())
             logger.info(f"切换成功: task={task_id}")
-            notifier.notify_success(apply_id, biz, node_id)
+            notifier.notify_success(task)
 
             # 节点3成功后释放业务锁
             if node_id == "node_3":
@@ -56,10 +56,7 @@ async def poll_oos_result(
                 finished_at=datetime.now(),
                 error_msg=f"OOS执行状态: {status}",
             )
-            notifier.urgent_alert(
-                f"[切换失败] apply_id={apply_id}, biz={biz}, "
-                f"node={node_id}, status={status}, 业务锁未释放,请运维处理"
-            )
+            notifier.notify_failure(task, f"OOS 执行终态为 {status}")
             terminal_status = "failed"
             break
 
@@ -71,8 +68,8 @@ async def poll_oos_result(
             finished_at=datetime.now(),
             error_msg="轮询超时",
         )
-        notifier.urgent_alert(
-            f"[切换轮询超时] apply_id={apply_id}, exec_id={execution_id}"
+        notifier.notify_failure(
+            task, f"轮询超时: {max_polls * interval}s 内未拿到终态"
         )
 
     # 不管成功失败超时, 都要释放执行槽 + 推进队列
@@ -128,10 +125,7 @@ async def chain_start_next_queued() -> None:
         next_task.update(
             status="failed", error_msg=str(e), finished_at=datetime.now()
         )
-        notifier.urgent_alert(
-            f"[chain-start OOS 调用失败] task={next_task.task_id}, "
-            f"apply_id={next_task.apply_id}, error={e}"
-        )
+        notifier.notify_failure(next_task, f"队列启动 OOS 失败: {e}")
         # 递归: 这条挂了, 试下一条
         await chain_start_next_queued()
         return

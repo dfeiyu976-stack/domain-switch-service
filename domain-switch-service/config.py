@@ -42,5 +42,5 @@ TEMPLATE_MAP = {
     ("dual",     True):  "DomainSwitch-All-Dual",
 }
 
-# 通知
-DINGTALK_WEBHOOK = os.getenv("DINGTALK_WEBHOOK")
+# 通知 (飞书自定义机器人 webhook)
+FEISHU_WEBHOOK = os.getenv("FEISHU_WEBHOOK")

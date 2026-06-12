@@ -209,9 +209,7 @@ async def _switch(
         # 启动失败: 释放执行槽 + 标记 task 失败 + 顺势启动队列下一个
         lock_manager.release_exec_slot(holder=task_id)
         task.update(status="failed", error_msg=str(e), finished_at=datetime.now())
-        notifier.urgent_alert(
-            f"[OOS调用失败] apply_id={apply_id}, error={e}"
-        )
+        notifier.notify_failure(task, f"OOS 启动调用失败: {e}")
         # 异步触发 chain-start (导入放在函数内避免循环引用)
         from tasks.poll_oos import chain_start_next_queued
         background_tasks.add_task(chain_start_next_queued)
